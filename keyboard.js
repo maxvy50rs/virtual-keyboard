@@ -29,25 +29,43 @@ const keyboard = {
         localStorage.layout = localStorage.layout === 'en' ? 'ru' : 'en';
       }
     });
+    document.addEventListener('keydown', (e) => {
+      const alphanumeric = this.props.layouts[this.state.currentLayout];
+      if (alphanumeric.has(e.code)) {
+        const keyButton = document.getElementById(e.code);
+        keyButton.click();
+        keyButton.classList.add('key--pressed');
+      }
+    });
     document.addEventListener('keyup', (e) => {
       this.state.pressed.delete(e.code);
+      const keyButton = document.getElementById(e.code);
+      keyButton.classList.remove('key--pressed');
     });
 
     this.createKeys();
     this.elements.self.append(...this.elements.keys);
   },
 
-  bindTo(element) {
-    this.targetElem = element;
-  },
-
   createKeys() {
-    /* this.elements.keys = this.props.layouts.en.alphanumeric.map((key) => {
+    const layout = this.props.layouts[this.state.currentLayout];
+    let tabIndex = 1;
+    layout.forEach((char, code) => {
       const elem = document.createElement('div');
       elem.classList.add('key');
-      elem.innerHTML = key;
-      return elem;
-    }); */
+      elem.setAttribute('id', code);
+      elem.setAttribute('tabindex', tabIndex);
+      tabIndex += 1;
+      elem.innerHTML = char;
+      elem.addEventListener('click', () => {
+        this.props.targetElem.value += char;
+      });
+      this.elements.keys.push(elem);
+    });
+  },
+
+  bindTo(element) {
+    this.props.targetElem = element;
   },
 
   triggerEvent() {

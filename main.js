@@ -21,4 +21,5 @@ document.addEventListener('DOMContentLoaded', () => {
   const testArea = document.getElementById('test-area');
   keyboard.bindTo(testArea);
   keyboard.init();
+  alert('Привет! Я из-за работы не успел доделать некоторые моменты (описал в PR) -- буду признателен, если дашь мне еще немного времени и перепроверишь. Thanks!');
 });

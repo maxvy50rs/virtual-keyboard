@@ -33,7 +33,7 @@
 
 #keyboard {
   position: fixed;
-  padding: 2rem 2rem 1rem 2rem;
+  padding: 1rem 1rem 0.5rem 1rem;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -42,7 +42,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 30%;
+  height: 40%;
   border-top-left-radius: 0.3rem;
   border-top-right-radius: 0.3rem;
   background-color: rgba(255, 255, 255, 0.8);
@@ -62,6 +62,16 @@
   outline: none;
 }
 
+.key--wide {
+  width: 5.3rem;
+  background-color: #111111;
+}
+
+.key--space {
+  flex: 2 0 10rem;
+}
+
+.key:active,
 .key--pressed {
   background-color: rgba(72, 209, 204, 0.7);
   color: #242424;
@@ -71,10 +81,14 @@
   box-shadow: 0px 0px 3px 1px rgba(72, 209, 204, 0.7);
 }
 
-.key--wide {
-  width: 5rem;
+.row-breaker {
+  flex-basis: 100%;
 }
 
-.key--space {
-  flex: 1 0 5rem;
+.char {
+  display: none;
+}
+
+.char--visible {
+  display: inline;
 }

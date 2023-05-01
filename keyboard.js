@@ -18,49 +18,111 @@ const keyboard = {
   },
 
   init() {
+    this.state.currentLayout = localStorage.layout ?? 'en';
     this.elements.self = document.createElement('div');
     this.elements.self.setAttribute('id', 'keyboard');
     document.getElementById('main').append(this.elements.self);
 
-    this.state.currentLayout = localStorage.layout ?? 'en';
-    document.addEventListener('keydown', (e) => {
+    const mindPressed = (e) => {
       this.state.pressed.add(e.code);
-      if (this.state.pressed.has('ShiftLeft') && this.state.pressed.has('AltLeft')) {
-        localStorage.layout = localStorage.layout === 'en' ? 'ru' : 'en';
+    };
+    const forgetPressed = (e) => {
+      this.state.pressed.delete(e.code);
+    };
+    const handleShift = (e) => {
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        this.showChars(this.visibleCharsSelector());
       }
-    });
+    };
+    const handleLangSwitch = () => {
+      if (this.state.pressed.has('ControlLeft') && this.state.pressed.has('AltLeft')) {
+        localStorage.layout = localStorage.layout === 'en' ? 'ru' : 'en';
+        this.state.currentLayout = localStorage.layout;
+        this.showChars(this.visibleCharsSelector());
+      }
+    };
+    const handleCaps = (e) => {
+      if (e.code === 'CapsLock') this.state.isCapsLocked = !this.state.isCapsLocked;
+      this.showChars(this.visibleCharsSelector());
+    };
+
+    document.addEventListener('keydown', mindPressed);
+    document.addEventListener('keydown', handleShift);
+    document.addEventListener('keyup', forgetPressed);
+    document.addEventListener('keyup', handleShift);
+    document.addEventListener('keydown', handleLangSwitch);
+    document.addEventListener('keydown', handleCaps);
+
     document.addEventListener('keydown', (e) => {
-      const alphanumeric = this.props.layouts[this.state.currentLayout];
-      if (alphanumeric.has(e.code)) {
-        const keyButton = document.getElementById(e.code);
+      const chars = this.props.layouts[this.state.currentLayout];
+      const keyButton = document.getElementById(e.code);
+      keyButton.classList.add('key--pressed');
+      if (chars.has(e.code)) {
+        e.preventDefault();
         keyButton.click();
-        keyButton.classList.add('key--pressed');
       }
     });
     document.addEventListener('keyup', (e) => {
-      this.state.pressed.delete(e.code);
       const keyButton = document.getElementById(e.code);
       keyButton.classList.remove('key--pressed');
     });
 
     this.createKeys();
+    this.createSysKeys();
+    this.elements.keys.sort((a, b) => a.tabIndex - b.tabIndex);
     this.elements.self.append(...this.elements.keys);
+    this.showChars(this.visibleCharsSelector());
   },
 
   createKeys() {
-    const layout = this.props.layouts[this.state.currentLayout];
+    const codesMap = layouts.en;
+    const sysTabIndexes = [...layouts.sys.values()].map((sysKey) => sysKey.pos);
     let tabIndex = 1;
-    layout.forEach((char, code) => {
-      const elem = document.createElement('div');
-      elem.classList.add('key');
-      elem.setAttribute('id', code);
-      elem.setAttribute('tabindex', tabIndex);
-      tabIndex += 1;
-      elem.innerHTML = char;
-      elem.addEventListener('click', () => {
-        this.props.targetElem.value += char;
+    codesMap.forEach((_, code) => {
+      while (sysTabIndexes.indexOf(tabIndex) !== -1) {
+        tabIndex += 1;
+      }
+      const newKey = document.createElement('div');
+      newKey.classList.add('key');
+      newKey.setAttribute('id', code);
+      newKey.setAttribute('tabindex', tabIndex);
+      newKey.innerHTML = `
+        <span class="char char--en char--lower">${layouts.en.get(code).lower}</span>
+        <span class="char char--en char--upper">${layouts.en.get(code).upper}</span>
+        <span class="char char--ru char--lower">${layouts.ru.get(code).lower}</span>
+        <span class="char char--ru char--upper">${layouts.ru.get(code).upper}</span>
+      `;
+      if (code === 'Enter') {
+        newKey.innerHTML = 'Enter';
+        newKey.classList.add('key--wide');
+      }
+      if (code === 'Space') {
+        newKey.classList.add('key--space');
+      }
+      if (code === 'Tab') {
+        newKey.innerHTML = 'Tab';
+        newKey.classList.add('key--wide');
+      }
+      newKey.addEventListener('click', () => {
+        const char = layouts[this.state.currentLayout].get(code);
+        this.props.targetElem.value += this.isUpper() ? char.upper : char.lower;
       });
-      this.elements.keys.push(elem);
+
+      tabIndex += 1;
+      this.elements.keys.push(newKey);
+    });
+  },
+
+  createSysKeys() {
+    const codesMap = layouts.sys;
+    codesMap.forEach(({ pos, label }, code) => {
+      const newKey = document.createElement('div');
+      newKey.classList.add('key');
+      newKey.classList.add('key--wide');
+      newKey.setAttribute('id', code);
+      newKey.setAttribute('tabindex', pos);
+      newKey.innerHTML = label;
+      this.elements.keys.push(newKey);
     });
   },
 
@@ -68,13 +130,28 @@ const keyboard = {
     this.props.targetElem = element;
   },
 
-  triggerEvent() {
-
+  isUpper() {
+    const isShiftPressed = this.state.pressed.has('ShiftLeft') || this.state.pressed.has('ShiftRight');
+    return (this.state.isCapsLocked && !isShiftPressed)
+      || (!this.state.isCapsLocked && isShiftPressed);
   },
 
-  toggleCapsLock() {
-
+  showChars(selector) {
+    document
+      .querySelectorAll('.char--visible')
+      .forEach((elem) => { elem.classList.remove('char--visible'); });
+    document
+      .querySelectorAll(selector)
+      .forEach((elem) => { elem.classList.add('char--visible'); });
   },
+
+  visibleCharsSelector() {
+    if (this.isUpper() && this.state.currentLayout === 'en') return '.char--en.char--upper';
+    if (this.isUpper() && this.state.currentLayout === 'ru') return '.char--ru.char--upper';
+    if (!this.isUpper() && this.state.currentLayout === 'ru') return '.char--ru.char--lower';
+    return '.char--en.char--lower';
+  },
+
 };
 
 export default keyboard;

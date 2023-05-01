@@ -12,7 +12,7 @@ document.querySelector('#app').innerHTML = `
     <p>
       Keyboard developed on Ubuntu OS
       <br>
-      Press Left(Shift + Alt) to switch language to [alt-lang]
+      Press Left(Ctrl + Alt) to switch language to Russian
     </p>
   </footer>
 `;

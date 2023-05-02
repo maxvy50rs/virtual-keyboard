@@ -154,9 +154,10 @@ const keyboard = {
       if (breakRow) {
         newKey.dataset.breakRow = true;
       }
-      if (code === 'Backspace' || code === 'Delete') {
+      if (code === 'Backspace' || code === 'Delete' || code === 'CapsLock') {
         newKey.addEventListener('click', () => {
-          const keypressEvent = new KeyboardEvent('keypress', { code });
+          const eventType = code === 'CapsLock' ? 'keydown' : 'keypress';
+          const keypressEvent = new KeyboardEvent(eventType, { code });
           document.dispatchEvent(keypressEvent);
         });
       }

@@ -51,6 +51,16 @@ const keyboard = {
       }
       this.showChars(this.visibleCharsSelector());
     };
+    const handleRemove = (e) => {
+      if (!(e.code === 'Backspace') && !(e.code === 'Delete')) return;
+      e.preventDefault();
+      const temp = [...this.props.targetElem.value];
+      const startPos = this.props.targetElem.selectionStart + (e.code === 'Delete' ? 0 : -1);
+      temp[startPos] = '';
+      this.props.targetElem.value = temp.join('');
+      this.props.targetElem.selectionStart = Math.max(0, startPos);
+      this.props.targetElem.selectionEnd = Math.max(0, startPos);
+    };
 
     document.addEventListener('keydown', mindPressed);
     document.addEventListener('keydown', handleShift);
@@ -58,6 +68,7 @@ const keyboard = {
     document.addEventListener('keyup', handleShift);
     document.addEventListener('keydown', handleLangSwitch);
     document.addEventListener('keydown', handleCaps);
+    document.addEventListener('keypress', handleRemove);
 
     document.addEventListener('keydown', (e) => {
       if (e.code === 'CapsLock') return;
@@ -143,12 +154,20 @@ const keyboard = {
       if (breakRow) {
         newKey.dataset.breakRow = true;
       }
+      if (code === 'Backspace' || code === 'Delete') {
+        newKey.addEventListener('click', () => {
+          const keypressEvent = new KeyboardEvent('keypress', { code });
+          document.dispatchEvent(keypressEvent);
+        });
+      }
       this.elements.keys.push(newKey);
     });
   },
 
   bindTo(element) {
     this.props.targetElem = element;
+    element.focus();
+    element.addEventListener('blur', () => { element.focus(); });
   },
 
   isUpper() {

@@ -33,7 +33,7 @@
 
 #keyboard {
   position: fixed;
-  padding: 1rem 20rem 0.5rem 20rem;
+  padding: 1rem 1rem 0.5rem 1rem;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;

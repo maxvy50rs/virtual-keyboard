@@ -27,6 +27,7 @@ const keyboard = {
       this.state.pressed.add(e.code);
     };
     const forgetPressed = (e) => {
+      if (e.code === 'CapsLock') return;
       this.state.pressed.delete(e.code);
     };
     const handleShift = (e) => {
@@ -42,7 +43,12 @@ const keyboard = {
       }
     };
     const handleCaps = (e) => {
-      if (e.code === 'CapsLock') this.state.isCapsLocked = !this.state.isCapsLocked;
+      if (e.code !== 'CapsLock') return;
+      this.state.isCapsLocked = !this.state.isCapsLocked;
+      document.getElementById(e.code).classList.toggle('key--pressed');
+      if (this.state.pressed.has('CapsLock')) {
+        this.state.pressed.delete(e.code);
+      }
       this.showChars(this.visibleCharsSelector());
     };
 
@@ -54,6 +60,7 @@ const keyboard = {
     document.addEventListener('keydown', handleCaps);
 
     document.addEventListener('keydown', (e) => {
+      if (e.code === 'CapsLock') return;
       const chars = this.props.layouts[this.state.currentLayout];
       const keyButton = document.getElementById(e.code);
       keyButton.classList.add('key--pressed');
@@ -63,6 +70,7 @@ const keyboard = {
       }
     });
     document.addEventListener('keyup', (e) => {
+      if (e.code === 'CapsLock') return;
       const keyButton = document.getElementById(e.code);
       keyButton.classList.remove('key--pressed');
     });
@@ -70,7 +78,14 @@ const keyboard = {
     this.createKeys();
     this.createSysKeys();
     this.elements.keys.sort((a, b) => a.tabIndex - b.tabIndex);
-    this.elements.self.append(...this.elements.keys);
+    this.elements.keys.forEach((keyElem) => {
+      this.elements.self.append(keyElem);
+      if (keyElem.dataset.breakRow) {
+        const rowBreaker = document.createElement('div');
+        rowBreaker.classList.add('row-breaker');
+        this.elements.self.append(rowBreaker);
+      }
+    });
     this.showChars(this.visibleCharsSelector());
   },
 
@@ -78,7 +93,7 @@ const keyboard = {
     const codesMap = layouts.en;
     const sysTabIndexes = [...layouts.sys.values()].map((sysKey) => sysKey.pos);
     let tabIndex = 1;
-    codesMap.forEach((_, code) => {
+    codesMap.forEach(({ breakRow }, code) => {
       while (sysTabIndexes.indexOf(tabIndex) !== -1) {
         tabIndex += 1;
       }
@@ -103,6 +118,9 @@ const keyboard = {
         newKey.innerHTML = 'Tab';
         newKey.classList.add('key--wide');
       }
+      if (breakRow) {
+        newKey.dataset.breakRow = true;
+      }
       newKey.addEventListener('click', () => {
         const char = layouts[this.state.currentLayout].get(code);
         this.props.targetElem.value += this.isUpper() ? char.upper : char.lower;
@@ -115,13 +133,16 @@ const keyboard = {
 
   createSysKeys() {
     const codesMap = layouts.sys;
-    codesMap.forEach(({ pos, label }, code) => {
+    codesMap.forEach(({ pos, label, breakRow }, code) => {
       const newKey = document.createElement('div');
       newKey.classList.add('key');
       newKey.classList.add('key--wide');
       newKey.setAttribute('id', code);
       newKey.setAttribute('tabindex', pos);
       newKey.innerHTML = label;
+      if (breakRow) {
+        newKey.dataset.breakRow = true;
+      }
       this.elements.keys.push(newKey);
     });
   },

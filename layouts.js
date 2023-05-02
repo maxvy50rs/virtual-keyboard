@@ -39,7 +39,7 @@ export default {
     KeyL: { lower: 'l', upper: 'L' },
     Semicolon: { lower: ';', upper: ':' },
     Quote: { lower: '\'', upper: '"' },
-    Enter: { lower: '\n', upper: '\n' },
+    Enter: { lower: '\n', upper: '\n', breakRow: true },
     KeyZ: { lower: 'z', upper: 'Z' },
     KeyX: { lower: 'x', upper: 'X' },
     KeyC: { lower: 'c', upper: 'C' },
@@ -121,7 +121,6 @@ export default {
     ShiftLeft: { pos: 43, label: 'Shift' },
     ShiftRight: { pos: 55, label: 'Shift', breakRow: true },
     ControlLeft: { pos: 56, label: 'Ctrl' },
-    /* MetaLeft: 57, */
     AltLeft: { pos: 57, label: 'Alt' },
     AltRight: { pos: 59, label: 'Alt' },
     ControlRight: { pos: 63, label: 'Ctrl' },

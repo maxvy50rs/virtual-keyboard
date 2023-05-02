@@ -23,6 +23,14 @@ const keyboard = {
     this.elements.self.setAttribute('id', 'keyboard');
     document.getElementById('main').append(this.elements.self);
 
+    const killRestKeysEvents = (e) => {
+      const isChar = layouts.en.has(e.code);
+      const isSys = layouts.sys.has(e.code);
+      if (!isChar && !isSys) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    };
     const mindPressed = (e) => {
       this.state.pressed.add(e.code);
     };
@@ -62,6 +70,8 @@ const keyboard = {
       this.props.targetElem.selectionEnd = Math.max(0, startPos);
     };
 
+    document.addEventListener('keydown', killRestKeysEvents);
+    document.addEventListener('keyup', killRestKeysEvents);
     document.addEventListener('keydown', mindPressed);
     document.addEventListener('keydown', handleShift);
     document.addEventListener('keyup', forgetPressed);

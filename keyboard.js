@@ -134,7 +134,12 @@ const keyboard = {
       }
       newKey.addEventListener('click', () => {
         const char = layouts[this.state.currentLayout].get(code);
-        this.props.targetElem.value += this.isUpper() ? char.upper : char.lower;
+        const temp = [...this.props.targetElem.value];
+        const cursorPos = this.props.targetElem.selectionStart;
+        temp.splice(cursorPos, 0, this.isUpper() ? char.upper : char.lower);
+        this.props.targetElem.value = temp.join('');
+        this.props.targetElem.selectionStart = cursorPos + 1;
+        this.props.targetElem.selectionEnd = cursorPos + 1;
       });
 
       tabIndex += 1;
